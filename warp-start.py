@@ -35,14 +35,17 @@ def launcher():
         choices=[
             "Open a project", 
             "Create a project",
+            "Remove a project"
             ],
         default=None,
     ).execute()
     
     if action == "Open a project":
         open_project()
-    else:
+    elif action == "Create a project":
         create_project()
+    elif action == "Remove a project":
+        remove_project()
 
 def open_project():
     projects = load_projects()
@@ -70,7 +73,21 @@ def open_project():
         typer.echo(f"Running: {cmd}")
         subprocess.run(cmd, shell=True)
 
-    typer.echo(f"✅ Project '{project_name}' launched successfully!")
+    typer.echo(f"\n✅ Project '{project_name}' launched successfully!\n")
+
+def remove_project():
+    projects = load_projects()
+    project_name = inquirer.select(
+        message="Select a project to remove:",
+        choices=[Choice(value=project) for project in projects.keys()],
+        default=None,
+    ).execute()
+
+    del projects[project_name]
+    save_projects(projects)
+
+    typer.echo(f"\n✅ Project '{project_name}' removed successfully!\n")
+    launcher()
 
 def create_project():
     commands = []
@@ -113,6 +130,9 @@ def create_project():
             ).execute()
             workspace_path = os.path.expanduser(workspace_path)
             apps[apps.index("code workspace")] = f"code {workspace_path}"
+        if "firefox" in apps:
+            firefox_url = inquirer.text(message="Enter URL to open in Firefox (optional):").execute()
+            apps[apps.index("firefox")] = f"firefox {firefox_url}".strip()
         if project_path != '':
             if "thunar" in apps:
                 apps[apps.index("thunar")] = f"thunar {project_path}"
@@ -134,10 +154,9 @@ def create_project():
     projects[project_name] = {"apps": apps, "commands": commands}
     save_projects(projects)
 
-    typer.echo(f"✅ Project '{project_name}' created successfully!")
+    typer.echo(f"\n✅ Project '{project_name}' created successfully!\n")
 
-    # Open project after creation
-    open_project()
+    launcher()
 
 if __name__ == "__main__":
     app()

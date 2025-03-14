@@ -69,9 +69,9 @@ def open_project():
         subprocess.Popen([app], shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     # Run commands
-    for cmd in project["commands"]:
-        typer.echo(f"Running: {cmd}")
-        subprocess.run(cmd, shell=True)
+    # for cmd in project["commands"]:
+    #     typer.echo(f"Running: {cmd}")
+    #     subprocess.run(cmd, shell=True)
 
     typer.echo(f"\n✅ Project '{project_name}' launched successfully!\n")
 
@@ -137,7 +137,13 @@ def create_project():
             if "thunar" in apps:
                 apps[apps.index("thunar")] = f"thunar {project_path}"
             if "xfce4-terminal" in apps:
-                apps[apps.index("xfce4-terminal")] = f"xfce4-terminal --working-directory={project_path}"
+                idx = apps.index("xfce4-terminal")
+                shell = os.environ.get("SHELL")
+                apps[idx] = f"xfce4-terminal --working-directory={project_path}"
+                command = inquirer.text(message="Enter command to run in terminal (optional):").execute()
+                if command != '':
+                    apps[idx] += f" --command '{shell} -c \"{command}; exec {shell}\"'"
+
             if "code" in apps:
                 apps[apps.index("code")] = f"code {project_path}"
 
@@ -147,7 +153,7 @@ def create_project():
         "name": "commands",
         "message": "Enter commands to execute (comma-separated):"
     }
-    commands.extend(prompt(command_prompt)["commands"].split(","))
+    # commands.extend(prompt(command_prompt)["commands"].split(","))
 
     # Save project
     projects = load_projects()

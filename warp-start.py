@@ -132,7 +132,7 @@ def create_project():
             apps[apps.index("code workspace")] = f"code {workspace_path}"
         if "firefox" in apps:
             firefox_url = inquirer.text(message="Enter URL to open in Firefox (optional):").execute()
-            apps[apps.index("firefox")] = f"firefox {firefox_url}".strip()
+            apps[apps.index("firefox")] = f"firefox --new-window {firefox_url}".strip()
         if project_path != '':
             if "thunar" in apps:
                 apps[apps.index("thunar")] = f"thunar {project_path}"
